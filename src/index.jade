@@ -1,0 +1,55 @@
+doctype html
+html(lang='pt-BR')
+	head
+		title Alertas Ambientales en Peru
+		meta(name="viewport" content="width=device-width,initial-scale=1.0")
+		link(rel='stylesheet', href='/css/reset.css')
+		link(rel='stylesheet', href='/css/app.css')
+	body
+		//
+			#fb-root
+			script.
+				(function(d, s, id) {
+				var js, fjs = d.getElementsByTagName(s)[0];
+				if (d.getElementById(id)) return;
+				js = d.createElement(s); js.id = id;
+				js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&appId=APPID&version=v2.0";
+				fjs.parentNode.insertBefore(js, fjs);
+				}(document, 'script', 'facebook-jssdk'));
+
+		header#masthead
+			h1
+				a(href="/")
+					span Alertas Ambientales en Peru
+
+		section#alerts(ng-controller="AlertsController")
+
+			nav#alerts-nav
+				input(type="text" ng-model="alertsFilter" placeholder="Busque alertas")
+
+			section#content
+				ul
+					li(ng-repeat="item in filtered = (data | filter:alertsFilter:$)")
+						h3 {{item.title}}
+
+			section#map(ng-controller="MapController")
+				leaflet(defaults="mapDefaults" markers="markers = (filtered | toMarker)")
+
+		footer#mastfoot
+
+		//
+			script.
+				var _gaq = _gaq || [];
+				_gaq.push(['_setAccount', "ACCOUNT"]);
+				_gaq.push(['_setDomainName', 'DOMAIN']);
+				_gaq.push(['_trackPageview']);
+
+				(function() {
+				var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+				ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+				var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+				})();
+
+		script(type='text/javascript', src='/app.js')
+		link(rel='stylesheet', href='http://fonts.googleapis.com/css?family=Open+Sans:400italic,400,300,600,700')
+		link(rel='stylesheet', href='http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css')
