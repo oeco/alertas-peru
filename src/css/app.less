@@ -7,6 +7,14 @@ body {
 	height: 100%;
 }
 
+strong {
+	font-weight: 800;
+}
+
+p {
+	margin: 0 0 20px;
+}
+
 #masthead {
 	position: fixed;
 	top: 0;
@@ -47,7 +55,8 @@ body {
 		background: #f9f9f9;
 		.box-shadow(0 0 2px rgba(0,0,0,0.3));
 		position: relative;
-		z-index: 2;
+		border-bottom: 10px solid #27CF5B;
+		z-index: 101;
 		input {
 			background: transparent;
 			border: 0;
@@ -74,9 +83,25 @@ body {
 
 #map {
 	width: 70%;
+	position: relative;
 	.leaflet-container {
 		position: absolute;
 		width: 100%;
 	 	height: 100%;
+	}
+	#interaction {
+		position: absolute;
+		top: 40px;
+		right: 40px;
+		background: #fff;
+		z-index: 9999;
+		width: 250px;
+		padding: 20px;
+		pointer-events: none;
+		strong {
+			display: block;
+			text-transform: uppercase;
+			font-size: 80%;
+		}
 	}
 }

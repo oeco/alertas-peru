@@ -1,5 +1,3 @@
-window.L = require('leaflet');
-
 require('angular');
 require('angular-leaflet/dist/angular-leaflet-directive');
 
@@ -41,8 +39,15 @@ angular.module('alertas', ['leaflet-directive'])
 
 .controller('MapController', [
 	'leafletData',
+	'MapInteraction',
 	'$scope',
-	function(leafletData, $scope) {
+	function(leafletData, Interaction, $scope) {
+
+		$scope.$watch(function() {
+			return Interaction.get();
+		}, function(data) {
+			$scope.hover = data;
+		})
 
 		$scope.mapDefaults = {
 			scrollWheelZoom: true
@@ -85,6 +90,81 @@ angular.module('alertas', ['leaflet-directive'])
 
 		});
 
+	}
+])
+
+.factory('MapInteraction', [
+	function() {
+
+		var data = false;
+
+		return {
+			get: function() {
+				return data;
+			},
+			set: function(d) {
+				data = d;
+			},
+			clear: function() {
+				data = false;
+			}
+		}
+
+	}
+])
+
+.directive('alertasMap', [
+	'leafletData',
+	'MapInteraction',
+	'$rootScope',
+	function(leafletData, Interaction, $rootScope) {
+		return {
+			restrict: 'A',
+			link: function(scope, element, attrs) {
+
+				var table = attrs.alertasMap;
+
+				var sql = new cartodb.SQL({user: 'infoamazonia'});
+
+				var select = 'SELECT * FROM ' + table;
+
+				leafletData.getMap(attrs.id).then(function(map) {
+
+					cartodb.createLayer(map, {
+						user_name: 'infoamazonia',
+						type: 'cartodb',
+						sublayers: [{
+							sql: select,
+							cartocss: '#' + table + ' { polygon-fill: #136400; polygon-opacity: 0.2; line-color: #136400; line-width: 1; line-opacity: 0.6; }',
+							interactivity: 'area_sig,titular'
+						}],
+						options: {
+							tooltip: true
+						}
+					})
+					.addTo(map)
+					.done(function(layer) {
+
+						var sublayer = layer.getSubLayer(0);
+
+						sublayer.setInteraction(true);
+
+						layer.on('featureOver', function(event, latlng, pos, data, layerIndex) {
+							Interaction.set(data);
+							$rootScope.$broadcast('cartodbFeatureOver', _.extend({id: attrs.group}, data));
+						});
+
+						layer.on('featureOut', function(event) {
+							Interaction.clear();
+							$rootScope.$broadcast('cartodbFeatureOver', {id: attrs.group});
+						});
+
+					});
+
+				});
+
+			}
+		}
 	}
 ])
 

@@ -33,7 +33,11 @@ html(lang='pt-BR')
 						h3 {{item.title}}
 
 			section#map(ng-controller="MapController")
-				leaflet(defaults="mapDefaults" markers="markers = (filtered | toMarker)")
+				leaflet(defaults="mapDefaults" markers="markers = (filtered | toMarker)" alertas-map="conseciones_opb")
+				#interaction(ng-show="hover")
+					p(ng-repeat="(key,val) in hover")
+						strong {{key}}
+						| {{val}}
 
 		footer#mastfoot
 
@@ -50,6 +54,7 @@ html(lang='pt-BR')
 				var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
 				})();
 
+		script(type='text/javascript', src='http://libs.cartocdn.com/cartodb.js/v3/cartodb.js')
 		script(type='text/javascript', src='/app.js')
 		link(rel='stylesheet', href='http://fonts.googleapis.com/css?family=Open+Sans:400italic,400,300,600,700')
-		link(rel='stylesheet', href='http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css')
+		link(href='http://libs.cartocdn.com/cartodb.js/v3/themes/css/cartodb.css', rel='stylesheet', type='text/css')
