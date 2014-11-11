@@ -1,5 +1,8 @@
+require('mapbox.js/src/mapbox');
 require('angular');
 require('angular-leaflet/dist/angular-leaflet-directive');
+
+L.mapbox.accessToken = 'pk.eyJ1IjoiaW5mb2FtYXpvbmlhIiwiYSI6InItajRmMGsifQ.JnRnLDiUXSEpgn7bPDzp7g';
 
 var $ = require('jquery'),
 	_ = require('underscore');
@@ -127,7 +130,6 @@ angular.module('alertas', ['leaflet-directive'])
 		}
 
 		$scope.mapDefaults = {
-			tileLayer: 'http://{s}.tiles.mapbox.com/v3/infoamazonia.forest-amazonia,infoamazonia.forest_height_11,infoamazonia.deforestation-0-6,infoamazonia.gxbw53jj,infoamazonia.r0wqxgvi,infoamazonia.terra,infoamazonia.deforest7-12,infoamazonia.roads-raisg,infoamazonia.amazonia-cows,infoamazonia.amazonia-trees,infoamazonia.osm-brasil/{z}/{x}/{y}.png',
 			scrollWheelZoom: true
 		};
 
@@ -139,6 +141,18 @@ angular.module('alertas', ['leaflet-directive'])
 		$scope.$on('leafletDirectiveMarker.mouseout', function(event, args) {
 			args.leafletEvent.target.closePopup();
 			args.leafletEvent.target.setZIndexOffset(0);
+		});
+
+		leafletData.getMap().then(function(map) {
+
+			var id = 'infoamazonia.forest-amazonia,infoamazonia.forest_height_11,infoamazonia.deforestation-0-6,infoamazonia.gxbw53jj,infoamazonia.r0wqxgvi,infoamazonia.terra,infoamazonia.deforest7-12,infoamazonia.roads-raisg,infoamazonia.amazonia-trees,infoamazonia.osm-brasil';
+
+			var gridLayer = L.mapbox.gridLayer(id);
+
+			map.addLayer(L.mapbox.tileLayer(id));
+			map.addLayer(gridLayer);
+			map.addControl(L.mapbox.gridControl(gridLayer));
+
 		});
 
 		$scope.$watch('markers', function(markers) {
