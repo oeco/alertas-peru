@@ -36,7 +36,7 @@ html(lang='pt-BR')
 				leaflet(defaults="mapDefaults" markers="markers = (filtered | toMarker)" alertas-map cartodb="layer")
 				#layers(ng-show="layers.length > 1")
 					ul
-						li(ng-repeat="l in layers" ng-click="setLayer(l);")
+						li(ng-repeat="l in layers" ng-click="setLayer(l);" ng-class="{active:l==layer}")
 							h3 {{l.title}}
 				#interaction(ng-show="hover")
 					p(ng-repeat="(key,val) in hover")
