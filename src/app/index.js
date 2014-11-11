@@ -145,7 +145,7 @@ angular.module('alertas', ['leaflet-directive'])
 
 		leafletData.getMap().then(function(map) {
 
-			var id = 'infoamazonia.forest-amazonia,infoamazonia.forest_height_11,infoamazonia.deforestation-0-6,infoamazonia.gxbw53jj,infoamazonia.r0wqxgvi,infoamazonia.terra,infoamazonia.deforest7-12,infoamazonia.roads-raisg,infoamazonia.amazonia-trees,infoamazonia.osm-brasil';
+			var id = 'infoamazonia.ijkjp260,infoamazonia.forest-amazonia,infoamazonia.forest_height_11,infoamazonia.deforestation-0-6,infoamazonia.gxbw53jj,infoamazonia.r0wqxgvi,infoamazonia.terra,infoamazonia.deforest7-12,infoamazonia.roads-raisg,infoamazonia.amazonia-trees,infoamazonia.osm-brasil';
 
 			var gridLayer = L.mapbox.gridLayer(id);
 
