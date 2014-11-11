@@ -127,6 +127,7 @@ angular.module('alertas', ['leaflet-directive'])
 		}
 
 		$scope.mapDefaults = {
+			tileLayer: 'http://{s}.tiles.mapbox.com/v3/infoamazonia.forest-amazonia,infoamazonia.forest_height_11,infoamazonia.deforestation-0-6,infoamazonia.gxbw53jj,infoamazonia.r0wqxgvi,infoamazonia.terra,infoamazonia.deforest7-12,infoamazonia.roads-raisg,infoamazonia.amazonia-cows,infoamazonia.amazonia-trees,infoamazonia.osm-brasil/{z}/{x}/{y}.png',
 			scrollWheelZoom: true
 		};
 
