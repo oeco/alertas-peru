@@ -33,7 +33,11 @@ html(lang='pt-BR')
 						h3 {{item.title}}
 
 			section#map(ng-controller="MapController")
-				leaflet(defaults="mapDefaults" markers="markers = (filtered | toMarker)" alertas-map="conseciones_opb")
+				leaflet(defaults="mapDefaults" markers="markers = (filtered | toMarker)" alertas-map cartodb="layer")
+				#layers(ng-show="layers.length > 1")
+					ul
+						li(ng-repeat="l in layers" ng-click="setLayer(l);")
+							h3 {{l.title}}
 				#interaction(ng-show="hover")
 					p(ng-repeat="(key,val) in hover")
 						strong {{key}}

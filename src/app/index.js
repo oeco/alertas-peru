@@ -16,22 +16,89 @@ angular.module('alertas', ['leaflet-directive'])
 	'$http',
 	function($http) {
 
+		var url = settings.content;
+
 		return {
-			get: $http.get(settings.dataUrl)
+			get: $http.get(url),
+			parse: function(data) {
+				var entries = data.feed.entry;
+				var parsed = [];
+				var gdocsBase = 'gsx$';
+				_.each(entries, function(entry) {
+					parsed.push({
+						id: entry[gdocsBase + 'id']['$t'],
+						title: entry[gdocsBase + 'title']['$t'],
+						content: entry[gdocsBase + 'content']['$t'],
+						latitude: parseFloat(entry[gdocsBase + 'latitude']['$t']),
+						longitude: parseFloat(entry[gdocsBase + 'longitude']['$t'])
+					});
+				});
+				return parsed;
+			}
 		};
 
 	}
 ])
 
+.factory('CartoDBService', [
+	'$http',
+	function($http) {
+
+		var url = settings.layers;
+
+		return {
+			get: $http.get(url),
+			parse: function(data) {
+				var parsed = [];
+				var entries = data.feed.entry;
+				var gdocsBase = 'gsx$';
+				_.each(entries, function(entry) {
+					parsed.push({
+						title: entry[gdocsBase + 'title']['$t'],
+						description: entry[gdocsBase + 'description']['$t'],
+						user: entry[gdocsBase + 'user']['$t'],
+						table: entry[gdocsBase + 'table']['$t'],
+						interactivity: entry[gdocsBase + 'interactivity']['$t'],
+						cartocss: entry[gdocsBase + 'cartocss']['$t'],
+						category: entry[gdocsBase + 'category']['$t']
+					});
+				});
+				return parsed;
+			}
+		};
+
+	}
+])
+
+.factory('MapInteraction', [
+	function() {
+
+		var data = false;
+
+		return {
+			get: function() {
+				return data;
+			},
+			set: function(d) {
+				data = d;
+			},
+			clear: function() {
+				data = false;
+			}
+		}
+
+	}
+])
+
 .controller('AlertsController', [
-	'$scope',
 	'AlertsService',
-	function($scope, Alerts) {
+	'$scope',
+	function(Alerts, $scope) {
 
 		$scope.filtered = [];
 
 		Alerts.get.success(function(data) {
-			$scope.data = data;
+			$scope.data = Alerts.parse(data);
 		});
 
 	}
@@ -39,15 +106,25 @@ angular.module('alertas', ['leaflet-directive'])
 
 .controller('MapController', [
 	'leafletData',
+	'CartoDBService',
 	'MapInteraction',
 	'$scope',
-	function(leafletData, Interaction, $scope) {
+	function(leafletData, CartoDB, Interaction, $scope) {
 
 		$scope.$watch(function() {
 			return Interaction.get();
 		}, function(data) {
 			$scope.hover = data;
-		})
+		});
+
+		CartoDB.get.success(function(data) {
+			$scope.layers = CartoDB.parse(data);
+			$scope.setLayer($scope.layers[0]);
+		});
+
+		$scope.setLayer = function(layer) {
+			$scope.layer = layer;
+		}
 
 		$scope.mapDefaults = {
 			scrollWheelZoom: true
@@ -93,26 +170,6 @@ angular.module('alertas', ['leaflet-directive'])
 	}
 ])
 
-.factory('MapInteraction', [
-	function() {
-
-		var data = false;
-
-		return {
-			get: function() {
-				return data;
-			},
-			set: function(d) {
-				data = d;
-			},
-			clear: function() {
-				data = false;
-			}
-		}
-
-	}
-])
-
 .directive('alertasMap', [
 	'leafletData',
 	'MapInteraction',
@@ -122,42 +179,52 @@ angular.module('alertas', ['leaflet-directive'])
 			restrict: 'A',
 			link: function(scope, element, attrs) {
 
-				var table = attrs.alertasMap;
+				var layerData = scope.cartodb;
 
-				var sql = new cartodb.SQL({user: 'infoamazonia'});
-
-				var select = 'SELECT * FROM ' + table;
+				var curLayer;
 
 				leafletData.getMap(attrs.id).then(function(map) {
 
-					cartodb.createLayer(map, {
-						user_name: 'infoamazonia',
-						type: 'cartodb',
-						sublayers: [{
-							sql: select,
-							cartocss: '#' + table + ' { polygon-fill: #136400; polygon-opacity: 0.2; line-color: #136400; line-width: 1; line-opacity: 0.6; }',
-							interactivity: 'area_sig,titular'
-						}],
-						options: {
-							tooltip: true
+					scope.$watch('layer', function(layer) {
+
+						if(layer && typeof layer !== 'undefined') {
+
+							if(curLayer && typeof curLayer !== 'undefined') {
+								map.removeLayer(curLayer);
+							}
+
+							cartodb.createLayer(map, {
+								user_name: layer.user,
+								type: 'cartodb',
+								sublayers: [{
+									sql: 'SELECT * FROM ' + layer.table,
+									cartocss: layer.cartocss,
+									interactivity: layer.interactivity
+								}],
+								options: {
+									tooltip: true
+								}
+							}).addTo(map).done(function(layer) {
+
+								curLayer = layer;
+
+								var sublayer = layer.getSubLayer(0);
+
+								sublayer.setInteraction(true);
+
+								layer.on('featureOver', function(event, latlng, pos, data, layerIndex) {
+									Interaction.set(data);
+									$rootScope.$broadcast('cartodbFeatureOver', _.extend({id: attrs.group}, data));
+								});
+
+								layer.on('featureOut', function(event) {
+									Interaction.clear();
+									$rootScope.$broadcast('cartodbFeatureOver', {id: attrs.group});
+								});
+
+							});
+
 						}
-					})
-					.addTo(map)
-					.done(function(layer) {
-
-						var sublayer = layer.getSubLayer(0);
-
-						sublayer.setInteraction(true);
-
-						layer.on('featureOver', function(event, latlng, pos, data, layerIndex) {
-							Interaction.set(data);
-							$rootScope.$broadcast('cartodbFeatureOver', _.extend({id: attrs.group}, data));
-						});
-
-						layer.on('featureOut', function(event) {
-							Interaction.clear();
-							$rootScope.$broadcast('cartodbFeatureOver', {id: attrs.group});
-						});
 
 					});
 
