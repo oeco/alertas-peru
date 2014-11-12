@@ -20,18 +20,27 @@ html(lang='pt-BR')
 				}(document, 'script', 'facebook-jssdk'));
 
 		header#masthead
-			h1
-				a(href="/")
-					span Alertas Ambientales en Peru
+			.header-content
+				.header-item
+					h1
+						a(href="/")
+							span Alertas Ambientales en Peru
 
-			nav#alerts-nav
-				input(type="text" ng-model="alertsFilter" placeholder="Busque alertas")
-				select(ng-model="lugarFilter" ng-options="lugar for lugar in lugares")
-					option(value="") Seleccione un lugar
-				select(ng-model="motivoFilter" ng-options="motivo for motivo in motivos")
-					option(value="") Seleccione un motivo
-				select(ng-model="casoFilter" ng-options="caso for caso in casos")
-					option(value="") Seleccione un caso
+				.header-item
+					img.s-icon(src="img/search-icon.png")
+					input(type="text" ng-model="alertsFilter" placeholder="Busque alertas")
+
+				.header-item
+					select(ng-model="lugarFilter" ng-options="lugar for lugar in lugares")
+						option(value="") Seleccione un lugar
+
+				.header-item
+					select(ng-model="motivoFilter" ng-options="motivo for motivo in motivos")
+						option(value="") Seleccione un motivo
+
+				.header-item
+					select(ng-model="casoFilter" ng-options="caso for caso in casos")
+						option(value="") Seleccione un caso
 
 		section#alerts
 
