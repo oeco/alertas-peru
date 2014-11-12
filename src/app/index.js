@@ -1,4 +1,4 @@
-require('mapbox.js/src/mapbox');
+require('mapbox.js');
 require('angular');
 require('angular-leaflet/dist/angular-leaflet-directive');
 
@@ -29,9 +29,16 @@ angular.module('alertas', ['leaflet-directive'])
 				var gdocsBase = 'gsx$';
 				_.each(entries, function(entry) {
 					parsed.push({
-						id: entry[gdocsBase + 'id']['$t'],
-						title: entry[gdocsBase + 'title']['$t'],
-						content: entry[gdocsBase + 'content']['$t'],
+						casos: entry[gdocsBase + 'casos']['$t'],
+						lugar: entry[gdocsBase + 'lugar']['$t'],
+						motivo: entry[gdocsBase + 'motivo']['$t'],
+						fecha_salida: entry[gdocsBase + 'fechasalida']['$t'],
+						meses: entry[gdocsBase + 'meses']['$t'],
+						num_alertas: entry[gdocsBase + 'numalertas']['$t'],
+						hechos: entry[gdocsBase + 'hechos']['$t'],
+						utm_e: entry[gdocsBase + 'utme']['$t'],
+						utm_n: entry[gdocsBase + 'utmn']['$t'],
+						observaciones: entry[gdocsBase + 'observaciones']['$t'],
 						latitude: parseFloat(entry[gdocsBase + 'latitude']['$t']),
 						longitude: parseFloat(entry[gdocsBase + 'longitude']['$t'])
 					});
@@ -51,6 +58,9 @@ angular.module('alertas', ['leaflet-directive'])
 
 		return {
 			get: $http.get(url),
+			getUrl: function(layer) {
+				return 'https://' + layer.user + '.cartodb.com/tables/' + layer.table + '/public/map';
+			},
 			parse: function(data) {
 				var parsed = [];
 				var entries = data.feed.entry;
@@ -63,32 +73,13 @@ angular.module('alertas', ['leaflet-directive'])
 						table: entry[gdocsBase + 'table']['$t'],
 						interactivity: entry[gdocsBase + 'interactivity']['$t'],
 						cartocss: entry[gdocsBase + 'cartocss']['$t'],
-						category: entry[gdocsBase + 'category']['$t']
+						category: entry[gdocsBase + 'category']['$t'],
+						template: entry[gdocsBase + 'template']['$t']
 					});
 				});
 				return parsed;
 			}
 		};
-
-	}
-])
-
-.factory('MapInteraction', [
-	function() {
-
-		var data = false;
-
-		return {
-			get: function() {
-				return data;
-			},
-			set: function(d) {
-				data = d;
-			},
-			clear: function() {
-				data = false;
-			}
-		}
 
 	}
 ])
@@ -110,15 +101,8 @@ angular.module('alertas', ['leaflet-directive'])
 .controller('MapController', [
 	'leafletData',
 	'CartoDBService',
-	'MapInteraction',
 	'$scope',
-	function(leafletData, CartoDB, Interaction, $scope) {
-
-		$scope.$watch(function() {
-			return Interaction.get();
-		}, function(data) {
-			$scope.hover = data;
-		});
+	function(leafletData, CartoDB, $scope) {
 
 		CartoDB.get.success(function(data) {
 			$scope.layers = CartoDB.parse(data);
@@ -127,10 +111,15 @@ angular.module('alertas', ['leaflet-directive'])
 
 		$scope.setLayer = function(layer) {
 			$scope.layer = layer;
+		};
+
+		$scope.layerUrl = function(layer) {
+			return CartoDB.getUrl(layer);
 		}
 
 		$scope.mapDefaults = {
-			scrollWheelZoom: true
+			scrollWheelZoom: true,
+			maxZoom: 12
 		};
 
 		$scope.$on('leafletDirectiveMarker.mouseover', function(event, args) {
@@ -152,6 +141,14 @@ angular.module('alertas', ['leaflet-directive'])
 			map.addLayer(L.mapbox.tileLayer(id));
 			map.addLayer(gridLayer);
 			map.addControl(L.mapbox.gridControl(gridLayer));
+
+			map.addControl(L.control.scale());
+
+			var legendControl = L.mapbox.legendControl();
+
+			legendControl.addLegend('<div class="legend"><div class="lang-es"><p class="l3-deforestation key"> <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAN1wAADdcBQiibeAAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAAAiSURBVDiNY/yvw/CfgYqAiZqGjRo4auCogaMGjho4lAwEADIrAlIVkvZBAAAAAElFTkSuQmCC"> <span class="label">Área deforestada Agosto 2013 - Julio 2014 </span></p><p class="r-deforestation key"> <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAN1wAADdcBQiibeAAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAAAiSURBVDiNY/x/leE/AxUBEzUNGzVw1MBRA0cNHDVwKBkIAF6JAvvVtl19AAAAAElFTkSuQmCC"><span class="label">Área deforestada 2005 - 2013</span></p><p class="h-deforestation key"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAN1wAADdcBQiibeAAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAACsSURBVDiN7dPNDYJAEIbhd0dKkGgBhqM12IEnKVJOVqB1GAtQoQCN4ngBDL87xpvhOz+ZzGa/capKLUc3JSfmxYWUHSt90pUeJy0YacaNBGFGyJqDCzoH9jjX2rDMyYU82Hg3bTine4JBfCcGzt6hhZPBZy00JScB5lYnXrzUq2lo4eQbbHFSYd+vGp1U2FIVg6vX5sdSfzYsE2nGhK2p1D1uvJRGxkv5j0t5AxYj9pE+761zAAAAAElFTkSuQmCC"> <span class="label">Área deforestada 1976 - 1991</span></p><p class="forest-height key"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAN1wAADdcBQiibeAAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAABhSURBVDiNY+QS4/r/n/0/AwMHA8N/jv8MDOxQmoOBAUWcEB+qj4mByoB8A/9T20AcgHgDcbgI00AiFRILqONlJEcNolgmykAqhOdQ8zJNDSQzPAeJl/G4fpC4cGgZiBaeAFLJHceSAZttAAAAAElFTkSuQmCC"><span class="label">Altura de la selva 0 - 73m</span></p></div></div>');
+
+			map.addControl(legendControl);
 
 		});
 
@@ -187,16 +184,17 @@ angular.module('alertas', ['leaflet-directive'])
 
 .directive('alertasMap', [
 	'leafletData',
-	'MapInteraction',
 	'$rootScope',
-	function(leafletData, Interaction, $rootScope) {
+	function(leafletData, $rootScope) {
 		return {
 			restrict: 'A',
 			link: function(scope, element, attrs) {
 
 				var layerData = scope.cartodb;
 
-				var curLayer;
+				var tileLayer = false;
+				var gridLayer = false;
+				var gridControl = false;
 
 				leafletData.getMap(attrs.id).then(function(map) {
 
@@ -204,38 +202,45 @@ angular.module('alertas', ['leaflet-directive'])
 
 						if(layer && typeof layer !== 'undefined') {
 
-							if(curLayer && typeof curLayer !== 'undefined') {
-								map.removeLayer(curLayer);
+							if(tileLayer) {
+								map.removeLayer(tileLayer);
 							}
 
-							cartodb.createLayer(map, {
+							if(gridLayer) {
+								map.removeLayer(gridLayer);
+							}
+
+							if(gridControl) {
+								map.removeControl(gridControl);
+							}
+
+							var options = {
 								user_name: layer.user,
 								type: 'cartodb',
 								sublayers: [{
 									sql: 'SELECT * FROM ' + layer.table,
 									cartocss: layer.cartocss,
 									interactivity: layer.interactivity
-								}],
-								options: {
-									tooltip: true
-								}
-							}).addTo(map).done(function(layer) {
+								}]
+							};
 
-								curLayer = layer;
+							cartodb.Tiles.getTiles(options, function(tiles) {
 
-								var sublayer = layer.getSubLayer(0);
+								var tilejson = {
+									"scheme": "xyz",
+									"tilejson": "2.0.0",
+									"grids": [tiles.grids[0][0].replace('{s}', 'a')],
+									"tiles": [tiles.tiles[0].replace('{s}', 'a')],
+									"template": layer.template
+								};
 
-								sublayer.setInteraction(true);
+								tileLayer = L.mapbox.tileLayer(tilejson);
+								gridLayer = L.mapbox.gridLayer(tilejson);
+								gridControl = L.mapbox.gridControl(gridLayer);
 
-								layer.on('featureOver', function(event, latlng, pos, data, layerIndex) {
-									Interaction.set(data);
-									$rootScope.$broadcast('cartodbFeatureOver', _.extend({id: attrs.group}, data));
-								});
-
-								layer.on('featureOut', function(event) {
-									Interaction.clear();
-									$rootScope.$broadcast('cartodbFeatureOver', {id: attrs.group});
-								});
+								map.addLayer(tileLayer);
+								map.addLayer(gridLayer);
+								map.addControl(gridControl);
 
 							});
 
@@ -262,7 +267,7 @@ angular.module('alertas', ['leaflet-directive'])
 					markers[item.id] = {
 						lat: item.latitude,
 						lng: item.longitude,
-						message: '<h2>' + item.title + '</h2>' + '<p>' + item.content + '</p>'
+						message: '<h2>' + item.fecha_salida + ' ' + item.motivo + '</h2>' + '<p>' + item.observaciones + '</p>'
 					};
 				});
 
