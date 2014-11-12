@@ -4,8 +4,7 @@ require('angular-leaflet/dist/angular-leaflet-directive');
 
 L.mapbox.accessToken = 'pk.eyJ1IjoiaW5mb2FtYXpvbmlhIiwiYSI6InItajRmMGsifQ.JnRnLDiUXSEpgn7bPDzp7g';
 
-var $ = require('jquery'),
-	_ = require('underscore');
+window._ = require('underscore');
 
 /*
  * Settings
@@ -23,6 +22,14 @@ angular.module('alertas', ['leaflet-directive'])
 
 		return {
 			get: $http.get(url),
+			getUniqueVals: function(content, key) {
+				var vals = [];
+				_.each(content, function(item) {
+					if(item[key])
+						vals.push(item[key]);
+				});
+				return _.uniq(vals);
+			},
 			parse: function(data) {
 				var entries = data.feed.entry;
 				var parsed = [];
@@ -73,7 +80,6 @@ angular.module('alertas', ['leaflet-directive'])
 						table: entry[gdocsBase + 'table']['$t'],
 						interactivity: entry[gdocsBase + 'interactivity']['$t'],
 						cartocss: entry[gdocsBase + 'cartocss']['$t'],
-						category: entry[gdocsBase + 'category']['$t'],
 						template: entry[gdocsBase + 'template']['$t']
 					});
 				});
@@ -93,6 +99,9 @@ angular.module('alertas', ['leaflet-directive'])
 
 		Alerts.get.success(function(data) {
 			$scope.data = Alerts.parse(data);
+			$scope.casos = Alerts.getUniqueVals($scope.data, 'casos');
+			$scope.lugares = Alerts.getUniqueVals($scope.data, 'lugar');
+			$scope.motivos = Alerts.getUniqueVals($scope.data, 'motivo');
 		});
 
 	}
@@ -262,9 +271,9 @@ angular.module('alertas', ['leaflet-directive'])
 			if(input && input.length) {
 
 				var markers = {};
-				_.each(input, function(item) {
+				_.each(input, function(item, i) {
 					var icon = {};
-					markers[item.id] = {
+					markers[i] = {
 						lat: item.latitude,
 						lng: item.longitude,
 						message: '<h2>' + item.fecha_salida + ' ' + item.motivo + '</h2>' + '<p>' + item.observaciones + '</p>'

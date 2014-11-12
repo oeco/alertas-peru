@@ -7,7 +7,7 @@ html(lang='pt-BR')
 		link(rel='stylesheet', href='http://fonts.googleapis.com/css?family=Open+Sans:400italic,400,300,600,700')
 		link(href='https://api.tiles.mapbox.com/mapbox.js/v2.1.4/mapbox.css', rel='stylesheet', type='text/css')
 		link(rel='stylesheet', href='css/app.css')
-	body
+	body(ng-controller="AlertsController")
 		//
 			#fb-root
 			script.
@@ -24,14 +24,20 @@ html(lang='pt-BR')
 				a(href="/")
 					span Alertas Ambientales en Peru
 
-		section#alerts(ng-controller="AlertsController")
-
 			nav#alerts-nav
 				input(type="text" ng-model="alertsFilter" placeholder="Busque alertas")
+				select(ng-model="lugarFilter" ng-options="lugar for lugar in lugares")
+					option(value="") Seleccione un lugar
+				select(ng-model="motivoFilter" ng-options="motivo for motivo in motivos")
+					option(value="") Seleccione un motivo
+				select(ng-model="casoFilter" ng-options="caso for caso in casos")
+					option(value="") Seleccione un caso
+
+		section#alerts
 
 			section#content
 				ul
-					li(ng-repeat="item in filtered = (data | filter:alertsFilter:$)")
+					li(ng-repeat="item in filtered = (data | filter:alertsFilter:$ | filter:casoFilter:casos | filter:lugarFilter:lugar | filter:motivoFilter:motivo)")
 						h3 {{item.fecha_salida}} {{item.motivo}}
 						p {{item.hechos}}
 
@@ -58,5 +64,7 @@ html(lang='pt-BR')
 				var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
 				})();
 
+
 		script(type='text/javascript', src='http://libs.cartocdn.com/cartodb.js/v3/cartodb.core.js')
+		script(type='text/javascript', src='//code.jquery.com/jquery-2.1.1.min.js')
 		script(type='text/javascript', src='app.js')

@@ -2,7 +2,7 @@
 
 html,
 body {
-	font-family: "Open Sans";
+	font-family: "Open Sans", "Helvetica", "Arial", sans-serif;
 	width: 100%;
 	height: 100%;
 	line-height: 150%;
@@ -16,62 +16,84 @@ p {
 	margin: 0 0 20px;
 }
 
+@headerHeight: 80px;
+
 #masthead {
 	position: fixed;
 	top: 0;
-	height: 60px;
-	line-height: 60px;
+	height: @headerHeight;
+	line-height: @headerHeight;
 	left: 0;
 	right: 0;
 	.box-shadow(0 0 8px rgba(0,0,0,0.5));
 	z-index: 99999;
-	padding: 0 8%;
+	padding: 0 5%;
 	background: #fff;
 	h1 {
 		font-weight: 800;
 		text-transform: uppercase;
 		color: #000;
+		float: left;
+		line-height: @headerHeight;
+		margin: 0 40px 0 0;
 		a {
 			color: inherit;
 			text-decoration: none;
+		}
+	}
+	nav {
+		height: @headerHeight;
+		position: relative;
+		z-index: 101;
+		float: left;
+		input {
+			width: 200px;
+			margin-right: 20px;
+			float: left;
+			background: transparent;
+			border: 0;
+			height: @headerHeight;
+			outline: 0;
+			.box-sizing(border-box);
+		}
+		select {
+			font-family: "Open Sans", "Helvetica", "Arial", sans-serif;
+			background: transparent;
+			margin-top: 31px;
+			font-size: 12px;
+			border: none;
+			box-shadow: none;
+			color: #999;
+			margin-right: 20px;
+			float: left;
+			outline: 0;
+			padding: 0;
+			option {
+				color: #333;
+				padding: 0 10px;
+			}
 		}
 	}
 }
 
 #alerts {
 	width: 100%;
-	height: calc(~"100% - 60px");
-	margin-top: 60px;
+	height: 100%;
+	margin-top: 0;
 	position: relative;
 	float: left;
 	#map {
 		position: absolute;
-		top: 70px;
+		top: @headerHeight;
 		bottom: 0;
 		left: 0;
 		right: 0;
-	}
-	nav {
-		height: 60px;
-		background: #f9f9f9;
-		position: relative;
-		border-bottom: 10px solid #27CF5B;
-		z-index: 101;
-		input {
-			background: transparent;
-			border: 0;
-			height: 60px;
-			width: 100%;
-			outline: 0;
-			.box-sizing(border-box);
-			padding: 0 8%;
-		}
 	}
 	#content {
 		background: #f9f9f9;
 		position: absolute;
 		z-index: 100;
-		top: 60px;
+		top: @headerHeight;
 		bottom: 0;
 		width: 30%;
 		right: 0;
