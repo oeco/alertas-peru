@@ -20,7 +20,6 @@
     "node": "0.10.x",
     "npm": "1.2.x"
   },
-  "main": "mananciais.js",
   "scripts": {
     "postinstall": "./node_modules/.bin/napa && npm run build",
     "build": "./node_modules/grunt-cli/bin/grunt build",

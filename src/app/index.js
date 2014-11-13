@@ -6,6 +6,8 @@ L.mapbox.accessToken = 'pk.eyJ1IjoiaW5mb2FtYXpvbmlhIiwiYSI6InItajRmMGsifQ.JnRnLD
 
 window._ = require('underscore');
 
+var utmToLatLng = require('./utm');
+
 /*
  * Settings
  */
@@ -30,6 +32,19 @@ angular.module('alertas', ['leaflet-directive'])
 				});
 				return _.uniq(vals);
 			},
+			getLatLngs: function(utm, zone) {
+
+				var latlngs = [];
+				utm = utm.split(';');
+
+				_.each(utm, function(coord) {
+					coord = coord.split(',');
+					latlngs.push(utmToLatLng(parseInt(coord[0]), parseInt(coord[1]), zone, true));
+				});
+
+				return latlngs;
+
+			},
 			parse: function(data) {
 				var entries = data.feed.entry;
 				var parsed = [];
@@ -47,7 +62,9 @@ angular.module('alertas', ['leaflet-directive'])
 						utm_n: entry[gdocsBase + 'utmn']['$t'],
 						observaciones: entry[gdocsBase + 'observaciones']['$t'],
 						latitude: parseFloat(entry[gdocsBase + 'latitude']['$t']),
-						longitude: parseFloat(entry[gdocsBase + 'longitude']['$t'])
+						longitude: parseFloat(entry[gdocsBase + 'longitude']['$t']),
+						utm: entry[gdocsBase + 'utm']['$t'],
+						utm_zone: parseInt(entry[gdocsBase + 'utmzone']['$t'])
 					});
 				});
 				return parsed;
@@ -75,9 +92,9 @@ angular.module('alertas', ['leaflet-directive'])
 				_.each(entries, function(entry) {
 					parsed.push({
 						title: entry[gdocsBase + 'title']['$t'],
-						description: entry[gdocsBase + 'description']['$t'],
 						user: entry[gdocsBase + 'user']['$t'],
 						table: entry[gdocsBase + 'table']['$t'],
+						where: entry[gdocsBase + 'where']['$t'],
 						interactivity: entry[gdocsBase + 'interactivity']['$t'],
 						cartocss: entry[gdocsBase + 'cartocss']['$t'],
 						template: entry[gdocsBase + 'template']['$t']
@@ -127,8 +144,9 @@ angular.module('alertas', ['leaflet-directive'])
 		}
 
 		$scope.mapDefaults = {
+			tileLayer: 'https://4.maps.nlp.nokia.com/maptile/2.1/maptile/newest/satellite.day/{z}/{x}/{y}/256/png8?lg=eng&token=A7tBPacePg9Mj_zghvKt9Q&app_id=KuYppsdXZznpffJsKT24',
 			scrollWheelZoom: true,
-			maxZoom: 12
+			maxZoom: 13
 		};
 
 		$scope.$on('leafletDirectiveMarker.mouseover', function(event, args) {
@@ -143,7 +161,9 @@ angular.module('alertas', ['leaflet-directive'])
 
 		leafletData.getMap().then(function(map) {
 
-			var id = 'infoamazonia.ijkjp260,infoamazonia.forest-amazonia,infoamazonia.forest_height_11,infoamazonia.deforestation-0-6,infoamazonia.gxbw53jj,infoamazonia.r0wqxgvi,infoamazonia.terra,infoamazonia.deforest7-12,infoamazonia.roads-raisg,infoamazonia.amazonia-trees,infoamazonia.osm-brasil';
+			//map.addLayer(L.tileLayer(mapquest));
+
+			var id = 'infoamazonia.gxbw53jj,infoamazonia.terra,infoamazonia.deforest7-12,infoamazonia.roads-raisg';
 
 			var gridLayer = L.mapbox.gridLayer(id);
 
@@ -155,7 +175,7 @@ angular.module('alertas', ['leaflet-directive'])
 
 			var legendControl = L.mapbox.legendControl();
 
-			legendControl.addLegend('<div class="legend"><div class="lang-es"><p class="l3-deforestation key"> <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAN1wAADdcBQiibeAAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAAAiSURBVDiNY/yvw/CfgYqAiZqGjRo4auCogaMGjho4lAwEADIrAlIVkvZBAAAAAElFTkSuQmCC"> <span class="label">Área deforestada Agosto 2013 - Julio 2014 </span></p><p class="r-deforestation key"> <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAN1wAADdcBQiibeAAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAAAiSURBVDiNY/x/leE/AxUBEzUNGzVw1MBRA0cNHDVwKBkIAF6JAvvVtl19AAAAAElFTkSuQmCC"><span class="label">Área deforestada 2005 - 2013</span></p><p class="h-deforestation key"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAN1wAADdcBQiibeAAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAACsSURBVDiN7dPNDYJAEIbhd0dKkGgBhqM12IEnKVJOVqB1GAtQoQCN4ngBDL87xpvhOz+ZzGa/capKLUc3JSfmxYWUHSt90pUeJy0YacaNBGFGyJqDCzoH9jjX2rDMyYU82Hg3bTine4JBfCcGzt6hhZPBZy00JScB5lYnXrzUq2lo4eQbbHFSYd+vGp1U2FIVg6vX5sdSfzYsE2nGhK2p1D1uvJRGxkv5j0t5AxYj9pE+761zAAAAAElFTkSuQmCC"> <span class="label">Área deforestada 1976 - 1991</span></p><p class="forest-height key"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAN1wAADdcBQiibeAAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAABhSURBVDiNY+QS4/r/n/0/AwMHA8N/jv8MDOxQmoOBAUWcEB+qj4mByoB8A/9T20AcgHgDcbgI00AiFRILqONlJEcNolgmykAqhOdQ8zJNDSQzPAeJl/G4fpC4cGgZiBaeAFLJHceSAZttAAAAAElFTkSuQmCC"><span class="label">Altura de la selva 0 - 73m</span></p></div></div>');
+			legendControl.addLegend('<div class="legend"><div class="lang-es"><p class="l3-deforestation key"> <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAN1wAADdcBQiibeAAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAAAiSURBVDiNY/yvw/CfgYqAiZqGjRo4auCogaMGjho4lAwEADIrAlIVkvZBAAAAAElFTkSuQmCC"> <span class="label">Área deforestada Agosto 2013 - Julio 2014 </span></p><p class="r-deforestation key"> <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAN1wAADdcBQiibeAAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAAAiSURBVDiNY/x/leE/AxUBEzUNGzVw1MBRA0cNHDVwKBkIAF6JAvvVtl19AAAAAElFTkSuQmCC"><span class="label">Área deforestada 2005 - 2013</span></p><p class="forest-height key"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAN1wAADdcBQiibeAAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAABhSURBVDiNY+QS4/r/n/0/AwMHA8N/jv8MDOxQmoOBAUWcEB+qj4mByoB8A/9T20AcgHgDcbgI00AiFRILqONlJEcNolgmykAqhOdQ8zJNDSQzPAeJl/G4fpC4cGgZiBaeAFLJHceSAZttAAAAAElFTkSuQmCC"><span class="label">Altura de la selva 0 - 73m</span></p></div></div>');
 
 			map.addControl(legendControl);
 
@@ -223,11 +243,18 @@ angular.module('alertas', ['leaflet-directive'])
 								map.removeControl(gridControl);
 							}
 
+							var where = '';
+
+							if(layer.where) {
+								where = ' WHERE ' + layer.where;
+								console.log(where);
+							}
+
 							var options = {
 								user_name: layer.user,
 								type: 'cartodb',
 								sublayers: [{
-									sql: 'SELECT * FROM ' + layer.table,
+									sql: 'SELECT * FROM ' + layer.table + where,
 									cartocss: layer.cartocss,
 									interactivity: layer.interactivity
 								}]
@@ -265,7 +292,8 @@ angular.module('alertas', ['leaflet-directive'])
 ])
 
 .filter('toMarker', [
-	function() {
+	'AlertsService',
+	function(Alerts) {
 		return _.memoize(function(input) {
 
 			if(input && input.length) {
@@ -273,11 +301,14 @@ angular.module('alertas', ['leaflet-directive'])
 				var markers = {};
 				_.each(input, function(item, i) {
 					var icon = {};
-					markers[i] = {
-						lat: item.latitude,
-						lng: item.longitude,
-						message: '<h2>' + item.fecha_salida + ' ' + item.motivo + '</h2>' + '<p>' + item.observaciones + '</p>'
-					};
+					var latLngs = Alerts.getLatLngs(item.utm, item.utm_zone);
+					_.each(latLngs, function(latLng, c) {
+						markers[i + '_' + c] = {
+							lat: latLng.latitude,
+							lng: latLng.longitude,
+							message: '<h2>' + item.fecha_salida + ' ' + item.motivo + '</h2>' + '<p>' + item.observaciones + '</p>'
+						};
+					});
 				});
 
 				return markers;
