@@ -45,10 +45,27 @@ html(lang='pt-BR')
 		section#alerts
 
 			section#content
+				h2 Alertas
 				ul
-					li(ng-repeat="item in filtered = (data | filter:alertsFilter:$ | filter:casoFilter:casos | filter:lugarFilter:lugar | filter:motivoFilter:motivo)")
-						h3 {{item.fecha_salida}} {{item.motivo}}
-						p {{item.hechos}}
+					li.alert(ng-repeat="item in filtered = (data | filter:alertsFilter:$ | filter:casoFilter:casos | filter:lugarFilter:lugar | filter:motivoFilter:motivo)")
+						h3.clearfix
+							span.meta-item
+								span.entypo &#128197;
+								| {{item.fecha_salida}} 
+							span.meta-item
+								span.entypo &#9888;
+								| {{item.num_alertas}}
+							span.meta-item
+								span.entypo &#9881;
+								| {{item.motivo}}
+						p.hechos {{item.hechos}}
+						p.clearfix
+							span.meta-item
+								span.entypo &#127919;
+								| {{item.lugar}}
+							span.meta-item
+								span.entypo &#128206;
+								| {{item.casos}}
 
 			section#map(ng-controller="MapController")
 				leaflet(defaults="mapDefaults" markers="markers = (filtered | toMarker)" alertas-map cartodb="layer")
