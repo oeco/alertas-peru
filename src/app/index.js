@@ -61,10 +61,9 @@ angular.module('alertas', ['leaflet-directive'])
 						utm_e: entry[gdocsBase + 'utme']['$t'],
 						utm_n: entry[gdocsBase + 'utmn']['$t'],
 						observaciones: entry[gdocsBase + 'observaciones']['$t'],
-						latitude: parseFloat(entry[gdocsBase + 'latitude']['$t']),
-						longitude: parseFloat(entry[gdocsBase + 'longitude']['$t']),
 						utm: entry[gdocsBase + 'utm']['$t'],
-						utm_zone: parseInt(entry[gdocsBase + 'utmzone']['$t'])
+						utm_zone: parseInt(entry[gdocsBase + 'utmzone']['$t']),
+						utm_south: parseInt(entry[gdocsBase + 'utmsouth']['$t'])
 					});
 				});
 				return parsed;
@@ -247,7 +246,6 @@ angular.module('alertas', ['leaflet-directive'])
 
 							if(layer.where) {
 								where = ' WHERE ' + layer.where;
-								console.log(where);
 							}
 
 							var options = {
