@@ -115,7 +115,6 @@ angular.module('alertas', ['leaflet-directive'])
 
 		Alerts.get.success(function(data) {
 			$scope.data = Alerts.parse(data);
-			$scope.casos = Alerts.getUniqueVals($scope.data, 'casos');
 			$scope.lugares = Alerts.getUniqueVals($scope.data, 'lugar');
 			$scope.motivos = Alerts.getUniqueVals($scope.data, 'motivo');
 		});
