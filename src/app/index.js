@@ -141,8 +141,13 @@ angular.module('alertas', ['leaflet-directive'])
 			return CartoDB.getUrl(layer);
 		}
 
+		var baseLayers = {
+			nokia: 'https://4.maps.nlp.nokia.com/maptile/2.1/maptile/newest/satellite.day/{z}/{x}/{y}/256/png8?lg=eng&token=A7tBPacePg9Mj_zghvKt9Q&app_id=KuYppsdXZznpffJsKT24',
+			mapbox: 'https://{s}.tiles.mapbox.com/v4/infoamazonia.k8fmob32/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoiaW5mb2FtYXpvbmlhIiwiYSI6InItajRmMGsifQ.JnRnLDiUXSEpgn7bPDzp7g'
+		};
+
 		$scope.mapDefaults = {
-			tileLayer: 'https://4.maps.nlp.nokia.com/maptile/2.1/maptile/newest/satellite.day/{z}/{x}/{y}/256/png8?lg=eng&token=A7tBPacePg9Mj_zghvKt9Q&app_id=KuYppsdXZznpffJsKT24',
+			tileLayer: baseLayers.mapbox,
 			scrollWheelZoom: true,
 			maxZoom: 12
 		};
@@ -156,6 +161,16 @@ angular.module('alertas', ['leaflet-directive'])
 			args.leafletEvent.target.closePopup();
 			args.leafletEvent.target.setZIndexOffset(0);
 		});
+
+		var addMapBoxLayer = function(map, id) {
+
+			var gridLayer = L.mapbox.gridLayer(id);
+
+			map.addLayer(L.mapbox.tileLayer(id));
+			map.addLayer(gridLayer);
+			map.addControl(L.mapbox.gridControl(gridLayer));
+
+		};
 
 		leafletData.getMap().then(function(map) {
 
@@ -171,24 +186,34 @@ angular.module('alertas', ['leaflet-directive'])
 			map.addControl(miniMap);
 
 			/*
+			 * Scale
+			 */
+
+			map.addControl(L.control.scale());
+
+			/*
 			 * Base Layer
 			 */
 
-			var id = 'infoamazonia.gxbw53jj,infoamazonia.terra,infoamazonia.deforest7-12,infoamazonia.roads-raisg,infoamazonia.osm-brasil';
-
-			var gridLayer = L.mapbox.gridLayer(id);
-
-			map.addLayer(L.mapbox.tileLayer(id));
-			map.addLayer(gridLayer);
-			map.addControl(L.mapbox.gridControl(gridLayer));
-
-			map.addControl(L.control.scale());
+			addMapBoxLayer(map, 'infoamazonia.gxbw53jj,infoamazonia.terra,infoamazonia.deforest7-12,infoamazonia.roads-raisg,infoamazonia.osm-brasil');
 
 			var legendControl = L.mapbox.legendControl();
 
 			legendControl.addLegend('<div class="legend"><div class="lang-es"><p class="l3-deforestation key"> <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAN1wAADdcBQiibeAAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAAAiSURBVDiNY/yvw/CfgYqAiZqGjRo4auCogaMGjho4lAwEADIrAlIVkvZBAAAAAElFTkSuQmCC"> <span class="label">Área deforestada Agosto 2013 - Julio 2014 </span></p><p class="r-deforestation key"> <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAN1wAADdcBQiibeAAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAAAiSURBVDiNY/x/leE/AxUBEzUNGzVw1MBRA0cNHDVwKBkIAF6JAvvVtl19AAAAAElFTkSuQmCC"><span class="label">Área deforestada 2005 - 2013</span></p></div></div>');
 
 			map.addControl(legendControl);
+
+			/*
+			 * Indigenous lands
+			 */
+
+			addMapBoxLayer(map, 'infoamazonia.isa_indigena');
+
+			/*
+			 * Rivers
+			 */
+
+			addMapBoxLayer(map, 'infoamazonia.rivers');
 
 		});
 
