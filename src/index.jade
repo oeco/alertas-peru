@@ -6,6 +6,7 @@ html(lang='pt-BR')
 		link(rel='stylesheet', href='css/reset.css')
 		link(rel='stylesheet', href='http://fonts.googleapis.com/css?family=Open+Sans:400italic,400,300,600,700')
 		link(href='https://api.tiles.mapbox.com/mapbox.js/v2.1.4/mapbox.css', rel='stylesheet', type='text/css')
+		link(href='https://api.tiles.mapbox.com/mapbox.js/plugins/leaflet-minimap/v1.0.0/Control.MiniMap.css', type='text/css')
 		link(rel='stylesheet', href='css/app.css')
 	body(ng-controller="AlertsController")
 		//
@@ -66,10 +67,12 @@ html(lang='pt-BR')
 			section#map(ng-controller="MapController")
 				leaflet(defaults="mapDefaults" markers="markers = (filtered | toMarker)" alertas-map cartodb="layer")
 				#layers(ng-show="layers.length > 1")
+					h2 Camadas
 					ul
 						li(ng-repeat="l in layers" ng-click="setLayer(l);" ng-class="{active:l==layer}")
+							a.download.entypo(href="{{layerUrl(layer)}}" target="_blank" title="Descargar") &#59224;
+							p.short-title {{l.shortTitle}}
 							h3 {{l.title}}
-							a(href="{{layerUrl(layer)}}" target="_blank") Download
 
 		footer#mastfoot
 
@@ -86,7 +89,8 @@ html(lang='pt-BR')
 				var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
 				})();
 
-
 		script(type='text/javascript', src='http://libs.cartocdn.com/cartodb.js/v3/cartodb.core.js')
 		script(type='text/javascript', src='//code.jquery.com/jquery-2.1.1.min.js')
+		script(type='text/javascript', src='https://api.tiles.mapbox.com/mapbox.js/v2.1.4/mapbox.js')
+		script(type='text/javascript', src='https://api.tiles.mapbox.com/mapbox.js/plugins/leaflet-minimap/v1.0.0/Control.MiniMap.js')
 		script(type='text/javascript', src='app.js')

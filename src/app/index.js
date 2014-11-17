@@ -1,4 +1,3 @@
-require('mapbox.js');
 require('angular');
 require('angular-leaflet/dist/angular-leaflet-directive');
 
@@ -91,6 +90,7 @@ angular.module('alertas', ['leaflet-directive'])
 				_.each(entries, function(entry) {
 					parsed.push({
 						title: entry[gdocsBase + 'title']['$t'],
+						shortTitle: entry[gdocsBase + 'shorttitle']['$t'],
 						user: entry[gdocsBase + 'user']['$t'],
 						table: entry[gdocsBase + 'table']['$t'],
 						where: entry[gdocsBase + 'where']['$t'],
@@ -144,7 +144,7 @@ angular.module('alertas', ['leaflet-directive'])
 		$scope.mapDefaults = {
 			tileLayer: 'https://4.maps.nlp.nokia.com/maptile/2.1/maptile/newest/satellite.day/{z}/{x}/{y}/256/png8?lg=eng&token=A7tBPacePg9Mj_zghvKt9Q&app_id=KuYppsdXZznpffJsKT24',
 			scrollWheelZoom: true,
-			maxZoom: 13
+			maxZoom: 12
 		};
 
 		$scope.$on('leafletDirectiveMarker.mouseover', function(event, args) {
@@ -159,7 +159,20 @@ angular.module('alertas', ['leaflet-directive'])
 
 		leafletData.getMap().then(function(map) {
 
-			//map.addLayer(L.tileLayer(mapquest));
+			/*
+			 * Mini Map
+			 */
+
+			var miniMap = new L.Control.MiniMap(L.tileLayer('https://{s}.tiles.mapbox.com/v4/base.live-satellite+0.00x1.00;0.00x1.00;0.00x1.00;0.00x1.00,base.mapbox-streets+scale-1_water-0.00x1.00;0.00x1.00;0.00x1.00;0.00x0.00_streets-0.00x0.00;0.00x0.00;1.00x0.00;0.00x1.00_landuse-0.00x1.00;0.00x1.00;0.00x1.00;0.00x0.00_buildings-0.00x1.00;0.00x1.00;0.00x1.00;0.00x0.00/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6IlhHVkZmaW8ifQ.hAMX5hSW-QnTeRCMAy9A8Q'), {
+				zoomLevelOffset: -5,
+				position: 'bottomleft'
+			});
+
+			map.addControl(miniMap);
+
+			/*
+			 * Base Layer
+			 */
 
 			var id = 'infoamazonia.gxbw53jj,infoamazonia.terra,infoamazonia.deforest7-12,infoamazonia.roads-raisg,infoamazonia.osm-brasil';
 
@@ -321,3 +334,17 @@ angular.module('alertas', ['leaflet-directive'])
 ]);
 
 angular.bootstrap(document, ['alertas']);
+
+/*
+ * UI
+ */
+
+$(document).ready(function() {
+	$('#content')
+	.on('mouseover', function() {
+		$('body').addClass('hovering-alerts');
+	})
+	.on('mouseout', function() {
+		$('body').removeClass('hovering-alerts');
+	});
+});
