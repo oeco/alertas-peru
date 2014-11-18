@@ -296,8 +296,13 @@ p {
 		h3 { display: none; }
 		&:hover {
 			width: 250px;
-			h3 { display: block; }
-			.short-title { display: none; }
+			ul {
+				li {
+					height: auto;
+					h3 { display: block; }
+					.short-title { display: none; }
+				}
+			}
 		}
 		ul {
 			li {
