@@ -6,9 +6,9 @@ L.mapbox.accessToken = 'pk.eyJ1IjoiaW5mb2FtYXpvbmlhIiwiYSI6InItajRmMGsifQ.JnRnLD
 window.markerIcon = {
 	iconUrl: 'img/alert.png',
 	shadowUrl: '',
-	iconSize:     [20, 28], // size of the icon
+	iconSize:     [20, 24], // size of the icon
 	shadowSize:   [0, 0], // size of the shadow
-	iconAnchor:   [10, 28], // point of the icon which will correspond to marker's location
+	iconAnchor:   [10, 24], // point of the icon which will correspond to marker's location
 	shadowAnchor: [0, 0],  // the same for the shadow
 	popupAnchor:  [0, -22] // point from which the popup should open relative to the iconAnchor
 }
