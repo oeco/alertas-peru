@@ -49,21 +49,21 @@ html(lang='pt-BR')
 					li.alert(ng-repeat="item in filtered = (data | filter:alertsFilter:$ | filter:casoFilter:casos | filter:lugarFilter:lugar | filter:motivoFilter:motivo)")
 						h3.clearfix
 							span.meta-item
-								span.entypo &#128197;
+								span.entypo &#xe604;
 								| {{item.fecha_salida}} 
 							span.meta-item
-								span.entypo &#9888;
+								span.entypo &#xe607;
 								| {{item.num_alertas}}
 							span.meta-item
-								span.entypo &#9881;
+								span.entypo &#xe603;
 								| {{item.motivo}}
 						p.hechos {{item.hechos}}
 						p.clearfix
 							span.meta-item
-								span.entypo &#127919;
+								span.entypo &#xe602;
 								| {{item.lugar}}
 							span.meta-item
-								span.entypo &#128206;
+								span.entypo &#xe611;
 								| {{item.casos}}
 
 			section#map(ng-controller="MapController")
@@ -72,7 +72,7 @@ html(lang='pt-BR')
 					h2 Camadas
 					ul
 						li(ng-repeat="l in layers" ng-click="setLayer(l);" ng-class="{active:l==layer}")
-							a.download.entypo(href="{{layerUrl(layer)}}" target="_blank" title="Descargar") &#59224;
+							a.download.entypo(href="{{layerUrl(layer)}}" target="_blank" title="Descargar") &#xe608;
 							p.short-title {{l.shortTitle}}
 							h3 {{l.title}}
 
