@@ -168,7 +168,7 @@ p {
 		bottom: 0;
 		width: 35%;
 		right: -20%;
-		.box-shadow(0 2px 2px rgba(0,0,0,0.3));
+		.box-shadow(0 0 2px rgba(0,0,0,0.3));
 		.box-sizing(border-box);
 		padding: 20px;
 		overflow: auto;
@@ -277,18 +277,21 @@ p {
 	}
 	#layers {
 		position: absolute;
-		top: 25%;
+		top: 20%;
 		left: 0;
 		background: #fff;
 		z-index: 1000001;
 		width: 150px;
 		.transition(width .2s ease-in-out);
+		.box-shadow(0 0 2px rgba(0,0,0,0.2));
 		h2 {
 			padding: 10px;
 			margin: 0 0 5px;
 			text-transform: uppercase;
 			color: #666;
-			border-bottom: 1px solid #999;
+			border-bottom: 1px solid #ddd;
+			font-size: 14px;
+			font-weight: 800;
 		}
 		h3 { display: none; }
 		&:hover {

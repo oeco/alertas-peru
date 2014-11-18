@@ -3,6 +3,16 @@ require('angular-leaflet/dist/angular-leaflet-directive');
 
 L.mapbox.accessToken = 'pk.eyJ1IjoiaW5mb2FtYXpvbmlhIiwiYSI6InItajRmMGsifQ.JnRnLDiUXSEpgn7bPDzp7g';
 
+window.markerIcon = {
+	iconUrl: 'img/alert.png',
+	shadowUrl: '',
+	iconSize:     [20, 28], // size of the icon
+	shadowSize:   [0, 0], // size of the shadow
+	iconAnchor:   [10, 28], // point of the icon which will correspond to marker's location
+	shadowAnchor: [0, 0],  // the same for the shadow
+	popupAnchor:  [0, -22] // point from which the popup should open relative to the iconAnchor
+}
+
 window._ = require('underscore');
 
 var utmToLatLng = require('./utm');
@@ -195,19 +205,13 @@ angular.module('alertas', ['leaflet-directive'])
 			 * Base Layer
 			 */
 
-			addMapBoxLayer(map, 'infoamazonia.gxbw53jj,infoamazonia.terra,infoamazonia.deforest7-12,infoamazonia.roads-raisg,infoamazonia.osm-brasil');
+			addMapBoxLayer(map, 'infoamazonia.terra,infoamazonia.deforest7-12');
 
 			var legendControl = L.mapbox.legendControl();
 
 			legendControl.addLegend('<div class="legend"><div class="lang-es"><p class="l3-deforestation key"> <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAN1wAADdcBQiibeAAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAAAiSURBVDiNY/yvw/CfgYqAiZqGjRo4auCogaMGjho4lAwEADIrAlIVkvZBAAAAAElFTkSuQmCC"> <span class="label">Área deforestada Agosto 2013 - Julio 2014 </span></p><p class="r-deforestation key"> <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAN1wAADdcBQiibeAAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAAAiSURBVDiNY/x/leE/AxUBEzUNGzVw1MBRA0cNHDVwKBkIAF6JAvvVtl19AAAAAElFTkSuQmCC"><span class="label">Área deforestada 2005 - 2013</span></p></div></div>');
 
 			map.addControl(legendControl);
-
-			/*
-			 * Indigenous lands
-			 */
-
-			addMapBoxLayer(map, 'infoamazonia.isa_indigena');
 
 			/*
 			 * Rivers
@@ -341,7 +345,8 @@ angular.module('alertas', ['leaflet-directive'])
 						markers[i + '_' + c] = {
 							lat: latLng.latitude,
 							lng: latLng.longitude,
-							message: '<h2>' + item.fecha_salida + ' ' + item.motivo + '</h2>' + '<p>' + item.observaciones + '</p>'
+							message: '<h2>' + item.fecha_salida + ' ' + item.motivo + '</h2>' + '<p>' + item.observaciones + '</p>',
+							icon: markerIcon
 						};
 					});
 				});
