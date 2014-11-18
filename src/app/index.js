@@ -345,7 +345,7 @@ angular.module('alertas', ['leaflet-directive'])
 						markers[i + '_' + c] = {
 							lat: latLng.latitude,
 							lng: latLng.longitude,
-							message: '<h2>' + item.fecha_salida + ' ' + item.motivo + '</h2>' + '<p>' + item.observaciones + '</p>',
+							message: '<h2>' + item.fecha_salida + ' ' + item.motivo + '</h2>' + '<p>' + item.hechos + '</p>',
 							icon: markerIcon
 						};
 					});
