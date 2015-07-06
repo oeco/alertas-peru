@@ -17,6 +17,33 @@ window._ = require('underscore');
 
 var utmToLatLng = require('./utm');
 
+function removeAccentMark(str) {
+
+	var map = {
+		a : /[\xE0-\xE6]/g,
+		A : /[\xC0-\xC6]/g,
+		e : /[\xE8-\xEB]/g,
+		E : /[\xC8-\xCB]/g,
+		i : /[\xEC-\xEF]/g,
+		I : /[\xCC-\xCF]/g,
+		o : /[\xF2-\xF6]/g,
+		O : /[\xD2-\xD6]/g,
+		u : /[\xF9-\xFC]/g,
+		U : /[\xD9-\xDC]/g,
+		c : /\xE7/g,
+		C : /\xC7/g,
+		n : /\xF1/g,
+		N : /\xD1/g,
+	};
+
+	for(var l in map ) {
+		var exp = map[l];
+		str = str.replace(exp, l);
+	}
+
+	return str;
+}
+
 /*
  * Settings
  */
@@ -56,6 +83,28 @@ angular.module('alertas', ['leaflet-directive'])
 				return latlngs;
 
 			},
+			getIcon: function(type) {
+				var icon = '';
+				var base = 'img/tipo/';
+				if(type.indexOf('í') !== -1) {
+					console.log(type);
+				}
+				switch(type) {
+					case 'Mineria Ilegal':
+						icon = base + 'mineria.png';
+						break;
+					case 'Invasion de presuntos agricultores':
+						icon = base + 'invasion.png';
+						break;
+					case 'Cambio de uso':
+						icon = base + 'cambio.png';
+						break;
+					case 'Verificacion de Grifo':
+						icon = base + 'grifo.png';
+						break;
+				}
+				return icon;
+			},
 			parse: function(data) {
 				var entries = data.feed.entry;
 				var parsed = [];
@@ -65,6 +114,7 @@ angular.module('alertas', ['leaflet-directive'])
 						casos: entry[gdocsBase + 'casos']['$t'],
 						lugar: entry[gdocsBase + 'lugar']['$t'],
 						motivo: entry[gdocsBase + 'motivo']['$t'],
+						_motivo: removeAccentMark(entry[gdocsBase + 'motivo']['$t']),
 						fecha_salida: entry[gdocsBase + 'fechasalida']['$t'],
 						meses: entry[gdocsBase + 'meses']['$t'],
 						num_alertas: entry[gdocsBase + 'numalertas']['$t'],
@@ -134,6 +184,8 @@ angular.module('alertas', ['leaflet-directive'])
 			$scope.lugares = Alerts.getUniqueVals($scope.data, 'lugar');
 			$scope.motivos = Alerts.getUniqueVals($scope.data, 'motivo');
 		});
+
+		$scope.getIcon = Alerts.getIcon;
 
 		var focusLayer = L.featureGroup();
 		var focusIcon = L.divIcon({
