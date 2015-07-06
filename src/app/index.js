@@ -32,7 +32,9 @@ angular.module('alertas', ['leaflet-directive'])
 		var url = settings.content;
 
 		return {
-			get: $http.get(url),
+			get: function() {
+				return $http.get(url);
+			},
 			getUniqueVals: function(content, key) {
 				var vals = [];
 				_.each(content, function(item) {
@@ -72,7 +74,8 @@ angular.module('alertas', ['leaflet-directive'])
 						observaciones: entry[gdocsBase + 'observaciones']['$t'],
 						utm: entry[gdocsBase + 'utm']['$t'],
 						utm_zone: parseInt(entry[gdocsBase + 'utmzone']['$t']),
-						utm_south: parseInt(entry[gdocsBase + 'utmsouth']['$t'])
+						utm_south: parseInt(entry[gdocsBase + 'utmsouth']['$t']),
+						link: entry[gdocsBase + 'link']['$t']
 					});
 				});
 				return parsed;
@@ -89,7 +92,9 @@ angular.module('alertas', ['leaflet-directive'])
 		var url = settings.layers;
 
 		return {
-			get: $http.get(url),
+			get: function() {
+				return $http.get(url);
+			},
 			getUrl: function(layer) {
 				return 'https://' + layer.user + '.cartodb.com/tables/' + layer.table + '/public/map';
 			},
@@ -119,14 +124,35 @@ angular.module('alertas', ['leaflet-directive'])
 .controller('AlertsController', [
 	'AlertsService',
 	'$scope',
-	function(Alerts, $scope) {
+	'leafletData',
+	function(Alerts, $scope, leafletData) {
 
 		$scope.filtered = [];
 
-		Alerts.get.success(function(data) {
+		Alerts.get().success(function(data) {
 			$scope.data = Alerts.parse(data);
 			$scope.lugares = Alerts.getUniqueVals($scope.data, 'lugar');
 			$scope.motivos = Alerts.getUniqueVals($scope.data, 'motivo');
+		});
+
+		var focusLayer = L.featureGroup();
+		var focusIcon = L.divIcon({
+			className: 'focus-icon',
+			iconSize: [80,80]
+		});
+
+		leafletData.getMap().then(function(map) {
+			focusLayer.addTo(map);
+			$scope.focusMap = function(item) {
+				$scope.focusedItem = item;
+				focusLayer.clearLayers();
+				var latLngs = Alerts.getLatLngs(item.utm, item.utm_zone);
+				_.each(latLngs, function(latLng, i) {
+					var latLng = L.latLng([latLng.latitude, latLng.longitude]);
+					L.marker(latLng, {icon: focusIcon}).addTo(focusLayer);
+				});
+				map.fitBounds(focusLayer.getBounds());
+			};
 		});
 
 	}
@@ -138,7 +164,7 @@ angular.module('alertas', ['leaflet-directive'])
 	'$scope',
 	function(leafletData, CartoDB, $scope) {
 
-		CartoDB.get.success(function(data) {
+		CartoDB.get().success(function(data) {
 			$scope.layers = CartoDB.parse(data);
 			$scope.setLayer($scope.layers[0]);
 		});
@@ -153,13 +179,14 @@ angular.module('alertas', ['leaflet-directive'])
 
 		var baseLayers = {
 			nokia: 'https://4.maps.nlp.nokia.com/maptile/2.1/maptile/newest/satellite.day/{z}/{x}/{y}/256/png8?lg=eng&token=A7tBPacePg9Mj_zghvKt9Q&app_id=KuYppsdXZznpffJsKT24',
-			mapbox: 'https://{s}.tiles.mapbox.com/v4/infoamazonia.k8fmob32/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoiaW5mb2FtYXpvbmlhIiwiYSI6InItajRmMGsifQ.JnRnLDiUXSEpgn7bPDzp7g'
+			mapbox: 'https://{s}.tiles.mapbox.com/v4/infoamazonia.k8fmob32/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoiaW5mb2FtYXpvbmlhIiwiYSI6InItajRmMGsifQ.JnRnLDiUXSEpgn7bPDzp7g',
+			mapbox_sat: 'https://{s}.tiles.mapbox.com/v4/infoamazonia.lejpdah7/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoiaW5mb2FtYXpvbmlhIiwiYSI6InItajRmMGsifQ.JnRnLDiUXSEpgn7bPDzp7g'
 		};
 
 		$scope.mapDefaults = {
 			tileLayer: baseLayers.mapbox,
 			scrollWheelZoom: true,
-			maxZoom: 12
+			maxZoom: 14
 		};
 
 		$scope.$on('leafletDirectiveMarker.mouseover', function(event, args) {

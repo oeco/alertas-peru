@@ -46,7 +46,7 @@ html(lang='pt-BR')
 			section#content
 				h2 Alertas
 				ul
-					li.alert(ng-repeat="item in filtered = (data | filter:alertsFilter:$ | filter:casoFilter:casos | filter:lugarFilter:lugar | filter:motivoFilter:motivo)")
+					li.alert(ng-repeat="item in filtered = (data | filter:alertsFilter:$ | filter:casoFilter:casos | filter:lugarFilter:lugar | filter:motivoFilter:motivo)" ng-click="focusMap(item)" ng-class="{active: focusedItem == item}")
 						h3.clearfix
 							span.meta-item
 								span.entypo &#xe604;
@@ -62,9 +62,9 @@ html(lang='pt-BR')
 							span.meta-item
 								span.entypo &#xe602;
 								| {{item.lugar}}
-							span.meta-item
-								span.entypo &#xe611;
-								| {{item.casos}}
+							//- span.meta-item
+							//- 	span.entypo &#xe611;
+							//- 	| {{item.casos}}
 
 			section#map(ng-controller="MapController")
 				leaflet(defaults="mapDefaults" markers="markers = (filtered | toMarker)" alertas-map cartodb="layer")
