@@ -254,12 +254,6 @@ angular.module('alertas', ['leaflet-directive'])
 			}
 		};
 
-		$scope.baseLayersNames = {
-			mapbox: 'Ríos y calles',
-			nokia: 'Nokia Satélite',
-			mapbox_sat: 'MapBox Satélite'
-		};
-
 		$scope.setBaseLayer = function(key) {
 			$scope.mapLayers.baselayers.baselayer = _.clone($scope.baseLayers[key]);
 			$scope.mapLayers.baselayers.baselayer.doRefresh = true;
@@ -268,12 +262,17 @@ angular.module('alertas', ['leaflet-directive'])
 		$scope.mapDefaults = {
 			// tileLayer: $scope.baseLayers.mapbox,
 			scrollWheelZoom: true,
-			maxZoom: 14
+			maxZoom: 14,
+			controls: {
+				layers: {
+					visible: false
+				}
+			}
 		};
 
 		$scope.$on('leafletDirectiveMarker.mouseover', function(event, args) {
 			args.leafletEvent.target.openPopup();
-			args.leafletEvent.target.setZIndexOffset(1000);
+			args.leafletEvent.target.setZIndexOffset(20);
 		});
 
 		$scope.$on('leafletDirectiveMarker.mouseout', function(event, args) {
@@ -418,7 +417,7 @@ angular.module('alertas', ['leaflet-directive'])
 									"template": layer.template
 								};
 
-								tileLayer = L.mapbox.tileLayer(tilejson, {zIndex: 3});
+								tileLayer = L.mapbox.tileLayer(tilejson, {zIndex: 5});
 								gridLayer = L.mapbox.gridLayer(tilejson);
 								gridControl = L.mapbox.gridControl(gridLayer);
 
