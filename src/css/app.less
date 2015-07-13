@@ -280,19 +280,47 @@ p {
 	}
 	#layers {
 		position: absolute;
-		top: 20%;
+		top: 80px;
 		left: 0;
 		background: #fff;
 		z-index: 1000001;
 		width: 150px;
 		.transition(width .2s ease-in-out);
 		.box-shadow(0 0 2px rgba(0,0,0,0.3));
+		.base-layer {
+			h2 {
+				padding: 5px 10px;
+				font-size: 10px;
+				margin: 0;
+			}
+			ul {
+				li {
+					padding: 5px 10px;
+					font-size: 12px;
+					line-height: 16px;
+					&.active,
+					&:hover {
+						width: auto;
+						margin: 0;
+						.transform(scale(1));
+					}
+					&.active {
+						padding: 10px !important;
+						font-weight: 600;
+					}
+					&:hover {
+						padding: 5px 10px;
+					}
+				}
+			}
+		}
 		h2 {
 			padding: 10px;
-			margin: 0 0 5px;
+			margin: 0;
 			text-transform: uppercase;
 			color: #666;
 			border-bottom: 1px solid #ddd;
+			border-top: 1px solid #ddd;
 			font-size: 14px;
 			font-weight: 800;
 		}

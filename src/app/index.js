@@ -214,7 +214,8 @@ angular.module('alertas', ['leaflet-directive'])
 	'leafletData',
 	'CartoDBService',
 	'$scope',
-	function(leafletData, CartoDB, $scope) {
+	'$timeout',
+	function(leafletData, CartoDB, $scope, $timeout) {
 
 		CartoDB.get().success(function(data) {
 			$scope.layers = CartoDB.parse(data);
@@ -229,14 +230,43 @@ angular.module('alertas', ['leaflet-directive'])
 			return CartoDB.getUrl(layer);
 		}
 
-		var baseLayers = {
-			nokia: 'https://4.maps.nlp.nokia.com/maptile/2.1/maptile/newest/satellite.day/{z}/{x}/{y}/256/png8?lg=eng&token=A7tBPacePg9Mj_zghvKt9Q&app_id=KuYppsdXZznpffJsKT24',
-			mapbox: 'https://{s}.tiles.mapbox.com/v4/infoamazonia.k8fmob32/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoiaW5mb2FtYXpvbmlhIiwiYSI6InItajRmMGsifQ.JnRnLDiUXSEpgn7bPDzp7g',
-			mapbox_sat: 'https://{s}.tiles.mapbox.com/v4/infoamazonia.lejpdah7/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoiaW5mb2FtYXpvbmlhIiwiYSI6InItajRmMGsifQ.JnRnLDiUXSEpgn7bPDzp7g'
+		$scope.baseLayers = {
+			nokia: {
+				name: 'Nokia Satélite',
+				type: 'xyz',
+				url: 'https://4.maps.nlp.nokia.com/maptile/2.1/maptile/newest/satellite.day/{z}/{x}/{y}/256/png8?lg=eng&token=A7tBPacePg9Mj_zghvKt9Q&app_id=KuYppsdXZznpffJsKT24',
+			},
+			mapbox: {
+				name: 'Ríos y calles',
+				type: 'xyz',
+				url: 'https://{s}.tiles.mapbox.com/v4/infoamazonia.k8fmob32/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoiaW5mb2FtYXpvbmlhIiwiYSI6InItajRmMGsifQ.JnRnLDiUXSEpgn7bPDzp7g',
+			},
+			mapbox_sat: {
+				name: 'MapBox Satélite',
+				type: 'xyz',
+				url: 'https://{s}.tiles.mapbox.com/v4/infoamazonia.lejpdah7/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoiaW5mb2FtYXpvbmlhIiwiYSI6InItajRmMGsifQ.JnRnLDiUXSEpgn7bPDzp7g',
+			}
+		};
+
+		$scope.mapLayers = {
+			baselayers: {
+				baselayer: $scope.baseLayers.mapbox
+			}
+		};
+
+		$scope.baseLayersNames = {
+			mapbox: 'Ríos y calles',
+			nokia: 'Nokia Satélite',
+			mapbox_sat: 'MapBox Satélite'
+		};
+
+		$scope.setBaseLayer = function(key) {
+			$scope.mapLayers.baselayers.baselayer = _.clone($scope.baseLayers[key]);
+			$scope.mapLayers.baselayers.baselayer.doRefresh = true;
 		};
 
 		$scope.mapDefaults = {
-			tileLayer: baseLayers.mapbox,
+			// tileLayer: $scope.baseLayers.mapbox,
 			scrollWheelZoom: true,
 			maxZoom: 14
 		};
@@ -255,7 +285,7 @@ angular.module('alertas', ['leaflet-directive'])
 
 			var gridLayer = L.mapbox.gridLayer(id);
 
-			map.addLayer(L.mapbox.tileLayer(id));
+			map.addLayer(L.mapbox.tileLayer(id, {zIndex: 2}));
 			map.addLayer(gridLayer);
 			map.addControl(L.mapbox.gridControl(gridLayer));
 
@@ -388,7 +418,7 @@ angular.module('alertas', ['leaflet-directive'])
 									"template": layer.template
 								};
 
-								tileLayer = L.mapbox.tileLayer(tilejson);
+								tileLayer = L.mapbox.tileLayer(tilejson, {zIndex: 3});
 								gridLayer = L.mapbox.gridLayer(tilejson);
 								gridControl = L.mapbox.gridControl(gridLayer);
 
